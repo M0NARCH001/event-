@@ -1,213 +1,152 @@
 "use client"
 
 import * as React from "react"
-import { Bar, BarChart, Label, Pie, PieChart, RadialBar, RadialBarChart, XAxis, YAxis, PolarAngleAxis } from "recharts"
+import { Bar, BarChart, Pie, PieChart, XAxis, YAxis } from "recharts"
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-// --- Chart 1: Registered Participants ---
-const registeredData = [
-  { category: "total", registered: 375, available: 25 },
-]
-
-const registeredConfig = {
-  registered: {
-    label: "Registered",
-    color: "hsl(230, 60%, 65%)", // Approximate blue-purple
-  },
-  available: {
-    label: "Available",
-    color: "hsl(100, 70%, 65%)", // Approximate light green
-  },
-} satisfies ChartConfig
+// --- Chart 1: Registered ---
+const registeredData = [{ category: "total", registered: 375, available: 25 }]
+const registeredConfig = { registered: { label: "Registered", color: "hsl(230, 60%, 65%)" }, available: { label: "Available", color: "hsl(100, 70%, 65%)" } } satisfies ChartConfig
 
 // --- Chart 2: Demographics ---
 const demographicsData = [
-  { type: "Male", visitors: 50, fill: "hsl(210, 90%, 75%)" }, // Light Blue
-  { type: "Female", visitors: 30, fill: "hsl(340, 80%, 75%)" }, // Pink
-  { type: "Other", visitors: 10, fill: "hsl(0, 0%, 75%)" },    // Grey
+  { type: "Male", visitors: 50, fill: "hsl(210, 90%, 75%)" },
+  { type: "Female", visitors: 30, fill: "hsl(340, 80%, 75%)" },
+  { type: "Other", visitors: 10, fill: "hsl(0, 0%, 75%)" },
 ]
+const demographicsConfig = { visitors: { label: "Visitors" } } satisfies ChartConfig
 
-const demographicsConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  Male: {
-    label: "Male",
-    color: "hsl(210, 90%, 75%)",
-  },
-  Female: {
-    label: "Female",
-    color: "hsl(340, 80%, 75%)",
-  },
-  Other: {
-    label: "Other",
-    color: "hsl(0, 0%, 75%)",
-  },
-} satisfies ChartConfig
+// --- Chart 3: Cancelled (percent value must match arc) ---
+const cancelledValue = 8
+const cancelledConfig = { Cancelled: { label: "Cancelled" } } satisfies ChartConfig
 
-// --- Chart 3: Cancelled Tickets ---
-const cancelledData = [
-  { name: "cancelled", value: 12, fill: "hsl(0, 80%, 65%)" }, // Reddish
-]
+// --- Gauge Arc (Left fill only) ---
+function CancelledGauge({ value }: { value: number }) {
+  const percent = Math.max(0, Math.min(100, value))
+  const radius = 50
+  const startX = 10
+  const endX = 110
+  const y = 55
+  const halfCircle = Math.PI * radius
+  const arcLength = (percent / 100) * halfCircle
+  const arcPath = `M${startX} ${y} A${radius} ${radius} 0 0 1 ${endX} ${y}`
 
-const cancelledConfig = {
-  cancelled: {
-    label: "Cancelled",
-    color: "hsl(0, 80%, 65%)",
-  },
-} satisfies ChartConfig
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 120 60" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="cancelGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#ff7f7f" />
+          <stop offset="100%" stopColor="#dc2626" />
+        </linearGradient>
+      </defs>
+
+      {/* Grey track */}
+      <path d={arcPath} fill="none" stroke="#e5e7eb" strokeWidth={8} strokeLinecap="round" />
+
+      {/* Red growing arc (left only) */}
+      <path
+        d={arcPath}
+        fill="none"
+        stroke="url(#cancelGradient)"
+        strokeWidth={8}
+        strokeLinecap="round"
+        strokeDasharray={`${arcLength} ${halfCircle}`}
+        strokeDashoffset={0}
+      />
+    </svg>
+  )
+}
 
 export function EventStats() {
   return (
-    <div className="grid gap-4 p-8 pt-0 md:grid-cols-3">
-      {/* Card 1: Registered Participants */}
-      <Card className="flex flex-col">
-        <CardHeader className="items-start pb-2">
-          <CardTitle className="text-lg font-medium">Registered Participants</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col justify-center">
-          <div className="mb-4 flex justify-between px-2 text-sm">
-            <div className="flex flex-col">
-              <span className="text-muted-foreground text-xs font-semibold uppercase">Registered</span>
-              <span className="text-2xl font-bold">375</span>
-            </div>
-            <div className="flex flex-col text-right">
-              <span className="text-muted-foreground text-xs font-semibold uppercase">Available</span>
-              <span className="text-2xl font-bold">25</span>
-            </div>
-          </div>
-          {/* Custom Bar Display using ChartContainer for consistent tooltip/theme if needed, but styling manually for split pill look */}
-          <ChartContainer config={registeredConfig} className="h-[50px] w-full">
-            <BarChart
-              accessibilityLayer
-              data={registeredData}
-              layout="vertical"
-              margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
-              barSize={32}
-            >
-              <XAxis type="number" hide />
-              <YAxis type="category" dataKey="category" hide />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar
-                dataKey="registered"
-                stackId="a"
-                fill="var(--color-registered)"
-                radius={[20, 0, 0, 20]}
-              />
-              <Bar
-                dataKey="available"
-                stackId="a"
-                fill="var(--color-available)"
-                radius={[0, 20, 20, 0]}
-              />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+    <div className="w-full">
 
-      {/* Card 2: Demographics */}
-      <Card className="flex flex-col">
-        <CardHeader className="items-start pb-0">
-          <CardTitle className="text-lg font-medium">Demographics (M/F/O)</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 pb-0">
-          <ChartContainer config={demographicsConfig} className="mx-auto aspect-square max-h-[140px]">
-            <PieChart>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-              <Pie
-                data={demographicsData}
-                dataKey="visitors"
-                nameKey="type"
-                innerRadius={30}
-                outerRadius={60}
-                strokeWidth={5}
-              />
-            </PieChart>
-          </ChartContainer>
-          <div className="flex items-center justify-center gap-4 pt-4">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded bg-[hsl(210,90%,75%)]"></div>
-              <span className="text-sm">Male</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded bg-[hsl(340,80%,75%)]"></div>
-              <span className="text-sm">Female</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded bg-[hsl(0,0%,75%)]"></div>
-              <span className="text-sm">Other</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Desktop = 3 columns, Mobile = 1 centered column */}
+      <div
+        className="grid gap-6 w-full max-w-5xl mx-auto
+                   md:grid-cols-3
+                   grid-cols-1
+                   md:justify-stretch justify-center"
+      >
 
-      {/* Card 3: Cancelled Tickets */}
-      <Card className="flex flex-col">
-        <CardHeader className="items-start pb-2">
-          <CardTitle className="text-lg font-medium">Cancelled Tickets</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-1 items-center pb-0">
-          <div className="flex w-full items-center justify-between px-4">
-            <span className="text-5xl font-medium tracking-tight">{cancelledData[0].value.toString().padStart(2, '0')}</span>
-            <ChartContainer
-              config={cancelledConfig}
-              className="mx-auto aspect-square max-h-[100px] w-full max-w-[120px]"
-            >
-              <PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
-                <defs>
-                  <radialGradient id="cancelGradient">
-                    <stop offset="0%" stopColor="#dc2626" />
-                    <stop offset="100%" stopColor="#ef4444" stopOpacity="1" />
-                  </radialGradient>
-                </defs>
-                {/* Background Track */}
-                <Pie
-                  data={[{ value: 100 }]}
-                  dataKey="value"
-                  cy="50%"
-                  startAngle={180}
-                  endAngle={0}
-                  innerRadius={30}
-                  outerRadius={44}
-                  stroke="none"
-                  fill="#e5e7eb"
-                  cornerRadius={8}
-                />
-                {/* Value Segment */}
-                <Pie
-                  data={[
-                    { value: cancelledData[0].value, fill: "url(#cancelGradient)" },
-                    { value: 100 - cancelledData[0].value, fill: "transparent" },
-                  ]}
-                  dataKey="value"
-                  cy="50%"
-                  startAngle={180}
-                  endAngle={0}
-                  innerRadius={30}
-                  outerRadius={44}
-                  stroke="none"
-                  cornerRadius={8}
-                />
+        {/* When stacked (mobile 1 col), force equal widths */}
+        <style>{`
+          @media (max-width: 768px) {
+            .grid-cols-1 > * {
+              width: 100%;
+              max-width: 400px; /* <-- This makes top 3 match Revenue card mobile width */
+            }
+          }
+        `}</style>
+
+        {/* Card 1 */}
+        <Card className="flex flex-col">
+          <CardHeader className="items-center pb-2 text-center">
+            <CardTitle className="text-lg font-medium">Registered Participants</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col items-center justify-center">
+            <div className="mb-4 flex justify-between w-full px-4 text-sm">
+              <div><span className="text-xs font-semibold uppercase">Registered</span><div className="text-2xl font-bold">375</div></div>
+              <div className="text-right"><span className="text-xs font-semibold uppercase">Available</span><div className="text-2xl font-bold">25</div></div>
+            </div>
+
+            <ChartContainer config={registeredConfig} className="h-[50px] w-full">
+              <BarChart data={registeredData} layout="vertical" margin={{ left: 0, right: 0, top: 0, bottom: 0 }} barSize={32}>
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="category" hide />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="registered" stackId="a" fill="var(--color-registered)" radius={[20, 0, 0, 20]} />
+                <Bar dataKey="available" stackId="a" fill="var(--color-available)" radius={[0, 20, 20, 0]} />
+              </BarChart>
+            </ChartContainer>
+
+          </CardContent>
+        </Card>
+
+        {/* Card 2 */}
+        <Card className="flex flex-col">
+          <CardHeader className="items-center pb-2 text-center">
+            <CardTitle className="text-lg font-medium">Demographics (M/F/O)</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col items-center justify-center">
+            <ChartContainer config={demographicsConfig} className="mx-auto max-h-[140px] w-full">
+              <PieChart>
+                <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                <Pie data={demographicsData} dataKey="visitors" nameKey="type" innerRadius={30} outerRadius={60} strokeWidth={5} />
               </PieChart>
             </ChartContainer>
-            <span className="text-sm font-medium whitespace-nowrap">{cancelledData[0].value}% Cancelled</span>
-          </div>
-        </CardContent>
-      </Card>
-    </div >
+
+            <div className="flex justify-center gap-4 pt-4 text-sm font-medium">
+              <div className="flex items-center gap-1"><span className="h-2 w-2 rounded bg-[hsl(210,90%,75%)]"></span> Male</div>
+              <div className="flex items-center gap-1"><span className="h-2 w-2 rounded bg-[hsl(340,80%,75%)]"></span> Female</div>
+              <div className="flex items-center gap-1"><span className="h-2 w-2 rounded bg-[hsl(0,0%,75%)]"></span> Other</div>
+            </div>
+
+          </CardContent>
+        </Card>
+
+        {/* Card 3 */}
+        <Card className="flex flex-col">
+          <CardHeader className="items-center pb-2 text-center">
+            <CardTitle className="text-lg font-medium">Cancelled Tickets</CardTitle>
+          </CardHeader>
+
+          <CardContent className="flex flex-1 items-center justify-center gap-5 text-center">
+            <span className="text-4xl font-medium">{cancelledValue.toString().padStart(2, "0")}</span>
+
+            {/* Gauge resized slightly larger but balanced */}
+            <div className="flex h-[75px] w-[150px] sm:h-[85px] sm:w-[170px] md:h-[80px] md:w-[160px] justify-center items-center">
+              <CancelledGauge value={cancelledValue} />
+            </div>
+
+            <span className="text-sm font-semibold whitespace-nowrap">{cancelledValue}% Cancelled</span>
+          </CardContent>
+
+        </Card>
+
+      </div>
+    </div>
   )
 }
