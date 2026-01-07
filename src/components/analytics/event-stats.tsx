@@ -101,7 +101,7 @@ export function EventStats() {
             >
               <XAxis type="number" hide />
               <YAxis type="category" dataKey="category" hide />
-              <ChartTooltip content={<ChartTooltipContent accessibilityLayer={false} />} />
+              <ChartTooltip content={<ChartTooltipContent />} />
               <Bar
                 dataKey="registered"
                 stackId="a"
@@ -127,7 +127,7 @@ export function EventStats() {
         <CardContent className="flex-1 pb-0">
           <ChartContainer config={demographicsConfig} className="mx-auto aspect-square max-h-[140px]">
             <PieChart>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel accessibilityLayer={false} />} />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
               <Pie
                 data={demographicsData}
                 dataKey="visitors"
