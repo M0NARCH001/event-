@@ -2,11 +2,10 @@
 
 import { StatsGrid } from "@/components/dashboard/stats-grid"
 import { UpcomingEventHighlights } from "@/components/dashboard/upcoming-event-highlights"
-import { QuickActions } from "@/components/dashboard/quick-actions"
 import { AnalyticsChart } from "@/components/dashboard/analytics-chart"
 import DashboardLayout from "@/components/layout/DashboardLayout"
 
-export default function Home() {
+export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -18,7 +17,6 @@ export default function Home() {
 
         <StatsGrid />
         <UpcomingEventHighlights />
-        <QuickActions />
         <AnalyticsChart />
       </div>
     </DashboardLayout>

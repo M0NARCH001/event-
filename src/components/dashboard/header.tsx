@@ -1,0 +1,50 @@
+"use client"
+
+import { Bell, Search, ChevronDown, Menu } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+
+interface HeaderProps {
+  onToggleSidebar: () => void
+}
+
+export function Header({ onToggleSidebar }: HeaderProps) {
+  return (
+    <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onToggleSidebar}>
+          <Menu className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Button className="bg-blue-900 hover:bg-blue-800 text-white h-9 px-4">
+          <span className="text-lg mr-1">+</span> Create Event
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+          <Bell className="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+          <Search className="h-5 w-5" />
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-9 px-2 gap-2">
+              <Avatar className="h-7 w-7">
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback className="bg-gray-300">O</AvatarFallback>
+              </Avatar>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem>Logout</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </header>
+  )
+}
